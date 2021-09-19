@@ -42,3 +42,32 @@ async function doMCQ() {
     await sleep(1000)
   }
 }
+
+// doShortAnswers fills all the short answer inputs with the right answer.
+// It does NOT submit the box, because Zybooks doesn't update it properly,
+// so the user MUST ADD A SPACE INTO THE BOX AND SUBMIT MANUALLY.
+async function doShortAnswers() {
+  for (let box of document.querySelectorAll(".short-answer-content-resource")) {
+    box.scrollIntoView()
+
+    for (let q of box.querySelectorAll(".short-answer-question")) {
+      const showAnswer = q.querySelector("button.show-answer-button")
+      showAnswer.click()
+      showAnswer.click()
+
+      const answer = q.querySelector(".zb-explanation span.forfeit-answer")
+        .textContent
+        .trim(" ")
+
+      const input = q.querySelector("textarea[aria-labelledby^='short-answer-question-definition']")
+      input.value = answer
+      input.textContent = answer
+
+      // q.querySelector("button.check-button").click()
+      await sleep(200)
+    }
+
+    await sleep(400)
+  }
+}
+
