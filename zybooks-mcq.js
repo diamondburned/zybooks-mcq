@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        doMCQ()
 // @namespace   Violentmonkey Scripts
-// @match       https://learn.zybooks.com/zybook/*
+// @match       https://learn.zybooks.com/*
 // @grant       none
 // @version     0.1
 // @author      -
@@ -71,3 +71,5 @@ async function doShortAnswers() {
   }
 }
 
+window.doMCQ = doMCQ
+window.doShortAnswers = doShortAnswers
