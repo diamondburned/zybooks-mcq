@@ -8,10 +8,6 @@
 // @description 9/18/2021, 4:46:34 PM
 // ==/UserScript==
 
-// Usage:
-// 1. Ctrl+Shift+C
-// 2. await doMCQ()
-
 async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }

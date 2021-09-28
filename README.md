@@ -11,6 +11,14 @@ going through all these? To top it off, I have to pay full tuition for online
 classes. What? Why? What is wrong with this world? How is it this bad? Where did
 we go so wrong? AAAAAAAAAAAAAAAAAAA
 
+## Usage
+
+1. Install the script, preferably using ViolentMonkey.
+2. Go to the Zybooks.
+3. Ctrl+Shift+C.
+4. `await window.doMCQ()`.
+5. Optionally do `await window.doShortAnswers()`.
+
 ## License
 
 AGPLv3.
