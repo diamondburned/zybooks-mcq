@@ -14,10 +14,17 @@ we go so wrong? AAAAAAAAAAAAAAAAAAA
 ## Usage
 
 1. Install the script, preferably using ViolentMonkey.
-2. Go to the Zybooks.
+2. Go to Zybooks (or refresh the page).
 3. Ctrl+Shift+C.
-4. `await window.doMCQ()`.
-5. Optionally do `await window.doShortAnswers()`.
+4. `await doAll()`.
+
+The script will do:
+
+- All multiple choice activities.
+- All playback participation activities.
+- Fill in short answers for you.
+	- To submit, add a space, delete the space, then submit.
+	- If you don't do that, the page will pretend the entry is empty.
 
 ## License
 

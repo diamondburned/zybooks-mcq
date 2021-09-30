@@ -8,6 +8,10 @@
 // @description 9/18/2021, 4:46:34 PM
 // ==/UserScript==
 
+// Usage:
+// 1. Ctrl+Shift+C
+// 2. await doAll()
+
 async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
@@ -16,8 +20,14 @@ async function waitUntil(f, ms = 10) {
   while (!f()) { await sleep(ms) }
 }
 
-async function doMCQ() {
+function isCompleted(elem) {
+  return !!elem.querySelector("[aria-label='Activity completed']")
+}
+
+window.doMCQ = async () => {
   for (let box of document.querySelectorAll(".multiple-choice-content-resource")) {
+    if (isCompleted(box)) continue;
+
     box.scrollIntoView()
 
     for (let q of box.querySelectorAll(".multiple-choice-question")) {
@@ -25,7 +35,7 @@ async function doMCQ() {
         if (q.querySelector(".zb-explanation.correct")) {
           break // already correct
         }
-        
+
         let explanation = q.querySelector(".zb-explanation")
         choice.click()
         // Wait until the explanation box disappears.
@@ -42,8 +52,10 @@ async function doMCQ() {
 // doShortAnswers fills all the short answer inputs with the right answer.
 // It does NOT submit the box, because Zybooks doesn't update it properly,
 // so the user MUST ADD A SPACE INTO THE BOX AND SUBMIT MANUALLY.
-async function doShortAnswers() {
+window.doShortAnswers = async () => {
   for (let box of document.querySelectorAll(".short-answer-content-resource")) {
+    if (isCompleted(box)) continue;
+
     box.scrollIntoView()
 
     for (let q of box.querySelectorAll(".short-answer-question")) {
@@ -67,5 +79,56 @@ async function doShortAnswers() {
   }
 }
 
-window.doMCQ = doMCQ
-window.doShortAnswers = doShortAnswers
+window.doParticipation = async () => {
+  for (let box of document.querySelectorAll(".animation-player-content-resource")) {
+    //if (isCompleted(box)) continue;
+
+    box.scrollIntoView()
+
+    let controls = box.querySelector(".animation-controls")
+
+    // Click Start.
+    controls.querySelector("button.start-button").click()
+
+    // Enable 2x speed.
+    let speed = controls.querySelector(".speed-control input[type='checkbox']")
+    if (!speed.checked) speed.click()
+
+    // TODO: there's no timeout in this while true loop. This loop may
+    // possibly permanently hang the page until it's closed.
+
+    // Start spamming the Play button.
+    while (true) {
+      let play = controls.querySelector("button[aria-label='Play']")
+      if (play) {
+        play.click()
+        continue
+      }
+
+      // No Play button. Check if we have a Play again button. If we
+      // do, then bail the loop.
+      let again = controls.querySelector("button[aria-label='Play again']")
+      if (again) {
+        break
+      }
+
+      // Check the Pause button. ONLY run the loop if we have a pause
+      // button to prevent deadlocking the page.
+      let pause = controls.querySelector("button[aria-label='Pause']")
+      if (pause) {
+        await sleep(100)
+        continue
+      }
+
+      // Dead loop. Log and bail.
+      console.log("No Play, Play again or Pause buttons found. Skipping.", box)
+      break
+    }
+  }
+}
+
+window.doAll = async () => {
+  await doParticipation()
+  await doMCQ()
+  await doShortAnswers()
+}
