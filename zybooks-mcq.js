@@ -26,17 +26,22 @@ function isCompleted(elem) {
 
 window.doMCQ = async () => {
   for (let box of document.querySelectorAll(".multiple-choice-content-resource")) {
+    console.log("found question set")
     if (isCompleted(box)) continue;
 
     box.scrollIntoView()
 
     for (let q of box.querySelectorAll(".multiple-choice-question")) {
-      for (let choice of q.querySelectorAll("fieldset > .zb-radio-button > input")) {
+      console.log("found question")
+      for (let choice of q.querySelectorAll(".question > .question-choices > .zb-radio-button > input")) {
+        console.log("choice found")
         if (q.querySelector(".zb-explanation.correct")) {
+          console.log("skipping correct")
           break // already correct
         }
 
         let explanation = q.querySelector(".zb-explanation")
+        console.log("clicking")
         choice.click()
         // Wait until the explanation box disappears.
         await waitUntil(() => (!explanation || !explanation.isConnected))
@@ -47,6 +52,7 @@ window.doMCQ = async () => {
 
     await sleep(1000)
   }
+  console.log("done")
 }
 
 // doShortAnswers fills all the short answer inputs with the right answer.
@@ -80,14 +86,20 @@ window.doShortAnswers = async () => {
 }
 
 window.doParticipation = async () => {
-  for (let box of document.querySelectorAll(".animation-player-content-resource")) {
-    //if (isCompleted(box)) continue;
+  console.log("called doParticipation")
+  for (let box of document.querySelectorAll(".interactive-activity-container.animation-player-content-resource")) {
+    console.log("starting participation", box)
+    if (isCompleted(box)) {
+      console.log("skipping completed")
+      continue;
+    }
 
     box.scrollIntoView()
 
     let controls = box.querySelector(".animation-controls")
 
     // Click Start.
+    console.log("starting animation", controls)
     controls.querySelector("button.start-button").click()
 
     // Enable 2x speed.
@@ -98,10 +110,19 @@ window.doParticipation = async () => {
     // possibly permanently hang the page until it's closed.
 
     // Start spamming the Play button.
+    await sleep(2000)
     while (true) {
+      if (isCompleted(box)) {
+        console.log("skipping completed")
+        break;
+      }
+      await sleep(3000)
       let play = controls.querySelector("button[aria-label='Play']")
+      console.log("this is play", play)
       if (play) {
+        console.log("clicking play")
         play.click()
+        await sleep(3000)
         continue
       }
 
@@ -109,6 +130,7 @@ window.doParticipation = async () => {
       // do, then bail the loop.
       let again = controls.querySelector("button[aria-label='Play again']")
       if (again) {
+        console.log("skipping again button")
         break
       }
 
@@ -116,7 +138,7 @@ window.doParticipation = async () => {
       // button to prevent deadlocking the page.
       let pause = controls.querySelector("button[aria-label='Pause']")
       if (pause) {
-        await sleep(100)
+        console.log("waiting pause")
         continue
       }
 
@@ -125,6 +147,7 @@ window.doParticipation = async () => {
       break
     }
   }
+  console.log("participation: all done")
 }
 
 window.doAll = async () => {
@@ -132,3 +155,4 @@ window.doAll = async () => {
   await doMCQ()
   await doShortAnswers()
 }
+
