@@ -26,7 +26,6 @@ function isCompleted(elem) {
 
 window.doMCQ = async () => {
   for (let box of document.querySelectorAll(".multiple-choice-content-resource")) {
-    console.log("found question set")
     if (isCompleted(box)) continue;
 
     box.scrollIntoView()
@@ -41,7 +40,6 @@ window.doMCQ = async () => {
         }
 
         let explanation = q.querySelector(".zb-explanation")
-        console.log("clicking")
         choice.click()
         // Wait until the explanation box disappears.
         await waitUntil(() => (!explanation || !explanation.isConnected))
@@ -116,11 +114,8 @@ window.doParticipation = async () => {
         console.log("skipping completed")
         break;
       }
-      await sleep(3000)
       let play = controls.querySelector("button[aria-label='Play']")
-      console.log("this is play", play)
       if (play) {
-        console.log("clicking play")
         play.click()
         await sleep(3000)
         continue
@@ -150,9 +145,97 @@ window.doParticipation = async () => {
   console.log("participation: all done")
 }
 
+window.doMatch = async () => {
+  console.log("called match")
+  for (let box of document.querySelectorAll(".definition-match-payload.custom-content-resource")) {
+    console.log("starting matching", box)
+    box.scrollIntoView()
+
+    if (isCompleted(box)) {
+      console.log("skipping completed")
+      continue;
+    }
+
+    let bank = box.querySelector(".draggable-object-target.ember-view")
+    let terms = box.querySelectorAll(".draggable-object")
+    let destrows = box.querySelectorAll(".definition-row")
+
+    for (var term of terms){
+      for (var destrow of destrows){
+        dest = destrow.querySelector(".draggable-object-target.definition-drag-container")
+        if (dest.querySelector(".draggable-object")) {
+          // skipping already filled box
+          console.log("skipping filled box")
+          continue
+        }
+        drag(term, dest)
+        await sleep(1000)
+        if (destrow.querySelector(".incorrect")) {
+          console.log("incorrect, reverting")
+          h = dest.querySelector(".draggable-object")
+          drag(h,bank)
+          await sleep(1000)
+          z = bank.querySelectorAll(".draggable-object")
+          term = z[z.length-1]
+          console.log(term)
+          continue;
+        } else {
+          console.log("correct")
+          break;
+        }
+      }
+    }
+  }
+  console.log("matching: all done")
+}
+
+function drag(srcObj, dstObj) {
+  console.log("dragging", srcObj, dstObj)
+  // Create a custom drag event
+  const dragStartEvent = new DragEvent('dragstart', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: new DataTransfer()
+  });
+
+  // Dispatch the dragstart event on the source object
+  srcObj.dispatchEvent(dragStartEvent);
+
+  // Create a custom dragover event
+  const dragOverEvent = new DragEvent('dragover', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the dragover event on the destination object
+  dstObj.dispatchEvent(dragOverEvent);
+
+  // Create a custom drop event
+  const dropEvent = new DragEvent('drop', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the drop event on the destination object
+  dstObj.dispatchEvent(dropEvent);
+
+  // Create a custom dragend event
+  const dragEndEvent = new DragEvent('dragend', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the dragend event on the source object
+  srcObj.dispatchEvent(dragEndEvent);
+}
+
 window.doAll = async () => {
   await doParticipation()
   await doMCQ()
-  await doShortAnswers()
+//  await doShortAnswers()
+  await doMatch()
 }
 
