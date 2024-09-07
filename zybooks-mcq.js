@@ -85,7 +85,9 @@ window.doShortAnswers = async () => {
 
 window.doParticipation = async () => {
   console.log("called doParticipation")
-  for (let box of document.querySelectorAll(".interactive-activity-container.animation-player-content-resource")) {
+//  for (let box of document.querySelectorAll(".interactive-activity-container.animation-player-content-resource")) {
+    for (let box of document.querySelectorAll(".interactive-activity-container")) {
+
     console.log("starting participation", box)
     if (isCompleted(box)) {
       console.log("skipping completed")
@@ -110,6 +112,7 @@ window.doParticipation = async () => {
     // Start spamming the Play button.
     await sleep(2000)
     while (true) {
+      await sleep(3000)
       if (isCompleted(box)) {
         console.log("skipping completed")
         break;
@@ -117,7 +120,6 @@ window.doParticipation = async () => {
       let play = controls.querySelector("button[aria-label='Play']")
       if (play) {
         play.click()
-        await sleep(3000)
         continue
       }
 
@@ -237,5 +239,6 @@ window.doAll = async () => {
   await doMCQ()
 //  await doShortAnswers()
   await doMatch()
+  console.log("ALL DONE")
 }
 
