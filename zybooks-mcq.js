@@ -87,7 +87,6 @@ window.doParticipation = async () => {
   console.log("called doParticipation")
 //  for (let box of document.querySelectorAll(".interactive-activity-container.animation-player-content-resource")) {
     for (let box of document.querySelectorAll(".interactive-activity-container")) {
-
     console.log("starting participation", box)
     if (isCompleted(box)) {
       console.log("skipping completed")
@@ -97,6 +96,10 @@ window.doParticipation = async () => {
     box.scrollIntoView()
 
     let controls = box.querySelector(".animation-controls")
+
+    if (!controls) {
+      continue
+    }
 
     // Click Start.
     console.log("starting animation", controls)
@@ -117,11 +120,6 @@ window.doParticipation = async () => {
         console.log("skipping completed")
         break;
       }
-      let play = controls.querySelector("button[aria-label='Play']")
-      if (play) {
-        play.click()
-        continue
-      }
 
       // No Play button. Check if we have a Play again button. If we
       // do, then bail the loop.
@@ -130,6 +128,19 @@ window.doParticipation = async () => {
         console.log("skipping again button")
         break
       }
+
+      let reversePlay = controls.querySelector(".rotate-180")
+      if (reversePlay) {
+        console.log("skipping again button")
+        break
+      }
+
+      let play = controls.querySelector("button[aria-label='Play']")
+      if (play) {
+        play.click()
+        continue
+      }
+
 
       // Check the Pause button. ONLY run the loop if we have a pause
       // button to prevent deadlocking the page.
@@ -235,10 +246,10 @@ function drag(srcObj, dstObj) {
 }
 
 window.doAll = async () => {
-  await doParticipation()
   await doMCQ()
-//  await doShortAnswers()
+  //await doShortAnswers()
   await doMatch()
+  await doParticipation()
   console.log("ALL DONE")
 }
 
