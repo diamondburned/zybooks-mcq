@@ -67,11 +67,15 @@ window.doShortAnswers = async () => {
       showAnswer.click()
       showAnswer.click()
 
-      const answer = q.querySelector(".zb-explanation span.forfeit-answer")
+      await sleep(500)
+      console.log(q)
+      const answer = q.querySelector("span.forfeit-answer")
         .textContent
         .trim(" ")
 
-      const input = q.querySelector("textarea[aria-labelledby^='short-answer-question-definition']")
+      console.log(answer)
+
+      const input = q.querySelector(".ember-text-area.zb-text-area")
       input.value = answer
       input.textContent = answer
 
@@ -247,7 +251,7 @@ function drag(srcObj, dstObj) {
 
 window.doAll = async () => {
   await doMCQ()
-  //await doShortAnswers()
+  await doShortAnswers()
   await doMatch()
   await doParticipation()
   console.log("ALL DONE")
