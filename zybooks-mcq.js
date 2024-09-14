@@ -31,8 +31,11 @@ window.doMCQ = async () => {
     box.scrollIntoView()
 
     for (let q of box.querySelectorAll(".multiple-choice-question")) {
-      for (let choice of q.querySelectorAll("fieldset > .zb-radio-button > input")) {
+      console.log("found question")
+      for (let choice of q.querySelectorAll(".question > .question-choices > .zb-radio-button > input")) {
+        console.log("choice found")
         if (q.querySelector(".zb-explanation.correct")) {
+          console.log("skipping correct")
           break // already correct
         }
 
@@ -47,6 +50,7 @@ window.doMCQ = async () => {
 
     await sleep(1000)
   }
+  console.log("done")
 }
 
 // doShortAnswers fills all the short answer inputs with the right answer.
@@ -63,11 +67,15 @@ window.doShortAnswers = async () => {
       showAnswer.click()
       showAnswer.click()
 
-      const answer = q.querySelector(".zb-explanation span.forfeit-answer")
+      await sleep(500)
+      console.log(q)
+      const answer = q.querySelector("span.forfeit-answer")
         .textContent
         .trim(" ")
 
-      const input = q.querySelector("textarea[aria-labelledby^='short-answer-question-definition']")
+      console.log(answer)
+
+      const input = q.querySelector(".ember-text-area.zb-text-area")
       input.value = answer
       input.textContent = answer
 
@@ -80,14 +88,25 @@ window.doShortAnswers = async () => {
 }
 
 window.doParticipation = async () => {
-  for (let box of document.querySelectorAll(".animation-player-content-resource")) {
-    //if (isCompleted(box)) continue;
+  console.log("called doParticipation")
+//  for (let box of document.querySelectorAll(".interactive-activity-container.animation-player-content-resource")) {
+    for (let box of document.querySelectorAll(".interactive-activity-container")) {
+    console.log("starting participation", box)
+    if (isCompleted(box)) {
+      console.log("skipping completed")
+      continue;
+    }
 
     box.scrollIntoView()
 
     let controls = box.querySelector(".animation-controls")
 
+    if (!controls) {
+      continue
+    }
+
     // Click Start.
+    console.log("starting animation", controls)
     controls.querySelector("button.start-button").click()
 
     // Enable 2x speed.
@@ -98,25 +117,40 @@ window.doParticipation = async () => {
     // possibly permanently hang the page until it's closed.
 
     // Start spamming the Play button.
+    await sleep(2000)
     while (true) {
-      let play = controls.querySelector("button[aria-label='Play']")
-      if (play) {
-        play.click()
-        continue
+      await sleep(3000)
+      if (isCompleted(box)) {
+        console.log("skipping completed")
+        break;
       }
 
       // No Play button. Check if we have a Play again button. If we
       // do, then bail the loop.
       let again = controls.querySelector("button[aria-label='Play again']")
       if (again) {
+        console.log("skipping again button")
         break
       }
+
+      let reversePlay = controls.querySelector(".rotate-180")
+      if (reversePlay) {
+        console.log("skipping again button")
+        break
+      }
+
+      let play = controls.querySelector("button[aria-label='Play']")
+      if (play) {
+        play.click()
+        continue
+      }
+
 
       // Check the Pause button. ONLY run the loop if we have a pause
       // button to prevent deadlocking the page.
       let pause = controls.querySelector("button[aria-label='Pause']")
       if (pause) {
-        await sleep(100)
+        console.log("waiting pause")
         continue
       }
 
@@ -125,10 +159,101 @@ window.doParticipation = async () => {
       break
     }
   }
+  console.log("participation: all done")
+}
+
+window.doMatch = async () => {
+  console.log("called match")
+  for (let box of document.querySelectorAll(".definition-match-payload.custom-content-resource")) {
+    console.log("starting matching", box)
+    box.scrollIntoView()
+
+    if (isCompleted(box)) {
+      console.log("skipping completed")
+      continue;
+    }
+
+    let bank = box.querySelector(".draggable-object-target.ember-view")
+    let terms = box.querySelectorAll(".draggable-object")
+    let destrows = box.querySelectorAll(".definition-row")
+
+    for (var term of terms){
+      for (var destrow of destrows){
+        dest = destrow.querySelector(".draggable-object-target.definition-drag-container")
+        if (dest.querySelector(".draggable-object")) {
+          // skipping already filled box
+          console.log("skipping filled box")
+          continue
+        }
+        drag(term, dest)
+        await sleep(1000)
+        if (destrow.querySelector(".incorrect")) {
+          console.log("incorrect, reverting")
+          h = dest.querySelector(".draggable-object")
+          drag(h,bank)
+          await sleep(1000)
+          z = bank.querySelectorAll(".draggable-object")
+          term = z[z.length-1]
+          console.log(term)
+          continue;
+        } else {
+          console.log("correct")
+          break;
+        }
+      }
+    }
+  }
+  console.log("matching: all done")
+}
+
+function drag(srcObj, dstObj) {
+  console.log("dragging", srcObj, dstObj)
+  // Create a custom drag event
+  const dragStartEvent = new DragEvent('dragstart', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: new DataTransfer()
+  });
+
+  // Dispatch the dragstart event on the source object
+  srcObj.dispatchEvent(dragStartEvent);
+
+  // Create a custom dragover event
+  const dragOverEvent = new DragEvent('dragover', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the dragover event on the destination object
+  dstObj.dispatchEvent(dragOverEvent);
+
+  // Create a custom drop event
+  const dropEvent = new DragEvent('drop', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the drop event on the destination object
+  dstObj.dispatchEvent(dropEvent);
+
+  // Create a custom dragend event
+  const dragEndEvent = new DragEvent('dragend', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer: dragStartEvent.dataTransfer
+  });
+
+  // Dispatch the dragend event on the source object
+  srcObj.dispatchEvent(dragEndEvent);
 }
 
 window.doAll = async () => {
-  await doParticipation()
   await doMCQ()
   await doShortAnswers()
+  await doMatch()
+  await doParticipation()
+  console.log("ALL DONE")
 }
+
