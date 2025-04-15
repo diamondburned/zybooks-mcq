@@ -75,11 +75,13 @@ window.doShortAnswers = async () => {
 
       console.log(answer)
 
-      const input = q.querySelector(".ember-text-area.zb-text-area")
+      const input = q.querySelector("input.zb-input")
       input.value = answer
       input.textContent = answer
+      const event = new Event('input', { bubbles: true })
+      input.dispatchEvent(event)
 
-      // q.querySelector("button.check-button").click()
+      q.querySelector("button.check-button").click()
       await sleep(200)
     }
 
