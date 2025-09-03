@@ -23,9 +23,7 @@ The script will do:
 - All multiple choice activities.
 - All playback participation activities.
 - All matching activities.
-- Fill in short answers for you.
-	- To submit, add a space, delete the space, then submit.
-	- If you don't do that, the page will pretend the entry is empty.
+- All short answer activities.
 
 ## License
 
