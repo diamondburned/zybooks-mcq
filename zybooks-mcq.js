@@ -12,6 +12,8 @@
 // 1. Ctrl+Shift+C
 // 2. await doAll()
 
+const ZYBOOK_POINTS_QUERY = ".points-completed-text"
+
 // Multiple-Choice Questions
 const MCQ_BOX_QUERY = ".multiple-choice-content-resource"
 const MCQ_QUERY = ".multiple-choice-question"
@@ -271,5 +273,18 @@ window.doAll = async () => {
   await doMatch()
   await doParticipation()
   console.log("ALL DONE")
+
+  // display points and flash green to notify user that we're done
+  let zybookPoints = document.querySelector(ZYBOOK_POINTS_QUERY);
+  zybookPoints.scrollIntoView();
+
+  let oldColor = zybookPoints.style["background-color"];
+
+  for (i = 0; i <= 3; i++) {
+    zybookPoints.style["background-color"] = "limegreen";
+    await sleep(500);
+    zybookPoints.style["background-color"] = oldColor;
+    await sleep(500);
+  }
 }
 
