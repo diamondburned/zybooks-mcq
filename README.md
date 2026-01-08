@@ -24,6 +24,7 @@ The script will do:
 - All playback participation activities.
 - All matching activities.
 - All short answer activities.
+- All Flowchart Execution activities. (Computer Science ZyBooks)
 
 ## License
 

@@ -29,7 +29,7 @@ const SHORT_ANSWER_RIGHT_ANSWER_QUERY = "span.forfeit-answer"
 const SHORT_ANSWER_INPUT_QUERY = "input.zb-input"
 
 // Participation Activities (Annoying Animations)
-const PARTICIPATION_BOX_QUERY = ".interactive-activity-container"
+const PARTICIPATION_BOX_QUERY = ".animation-player-content-resource.interactive-activity-container"
 const PARTICIPATION_MOVIE_CONTROLS_QUERY = ".animation-controls"
 const PARTICIPATION_MOVIE_CONTROLS_START_QUERY = "button.start-button"
 const PARTICIPATION_MOVIE_CONTROLS_2X_QUERY = ".speed-control input[type='checkbox']"
@@ -45,6 +45,13 @@ const MATCH_TERMS_QUERY = ".definition-match-term"
 const MATCH_DEFINITION_ROW_QUERY = ".definition-row"
 const MATCH_TERM_BUCKET_QUERY = ".term-bucket"
 const MATCH_INCORRECT_QUERY = ".incorrect"
+
+// Flowchart Execution Activities
+const EXECUTION_BOX_QUERY = ".custom-tool.zyFlowchart.zyFlowchartSDK"
+const EXECUTION_CONTROLS_QUERY = ".controls-container"
+const EXECUTION_CONTROLS_ENTER_QUERY = ".enter-execution"
+const EXECUTION_CONTROLS_RUN_SPEED_QUERY = ".run-speed"
+const EXECUTION_CONTROLS_RUN_QUERY = ".run"
 
 // ===== Helper Functions ===== //
 
@@ -267,10 +274,46 @@ window.doMatch = async () => {
   console.log("matching: all done")
 }
 
+window.doExecution = async () => {
+  console.log("called flowchart execution")
+  for (let box of document.querySelectorAll(EXECUTION_BOX_QUERY)) {
+    console.log("starting flowchart execution", box)
+    if (isCompleted(box)) {
+      console.log("skipping completed")
+      continue;
+    }
+    box.scrollIntoView()
+
+    let controls = box.querySelector(EXECUTION_CONTROLS_QUERY)
+
+    if (!controls) {
+      continue
+    }
+    // Click Enter Execution.
+    console.log("entering flowchart execution", controls)
+    controls.querySelector(EXECUTION_CONTROLS_ENTER_QUERY).click()
+
+    // Enable instant speed.
+    let speedSelect = controls.querySelector(EXECUTION_CONTROLS_RUN_SPEED_QUERY)
+    if (speedSelect) {
+        for (const option of speedSelect.options) {
+            if (option.textContent.trim() === "Instant") {
+                speedSelect.value = option.value;
+                speedSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                break;
+            }
+        }
+    }
+    // Click Run.
+    controls.querySelector(EXECUTION_CONTROLS_RUN_QUERY).click()
+  }
+}
+
 window.doAll = async () => {
   await doMCQ()
   await doShortAnswers()
   await doMatch()
+  await doExecution()
   await doParticipation()
   console.log("ALL DONE")
 
